@@ -14,14 +14,14 @@ class AuthController extends Controller
         $request->validate([
             'provider' => 'required|in:google,apple',
             'email' => 'required|email',
-            'provider_id' => 'required|string',
+            'token' => 'required|string',
         ]);
 
         $user = User::updateOrCreate(
             ['email' => $request->email],
             [
                 'provider' => $request->provider,
-                'provider_id' => $request->provider_id,
+                'provider_id' => $request->token,
             ]
         );
 
