@@ -43,9 +43,10 @@ class AuthController extends Controller
         $request->validate([
             'language' => 'sometimes|in:ru,kz',
             'theme' => 'sometimes|in:dark,light',
+            'tax_rate' => 'sometimes|numeric|min:0|max:100',
         ]);
 
-        $request->user()->update($request->only(['language', 'theme']));
+        $request->user()->update($request->only(['language', 'theme', 'tax_rate']));
 
         return response()->json($request->user());
     }

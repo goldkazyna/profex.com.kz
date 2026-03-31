@@ -18,6 +18,7 @@ class User extends Authenticatable
         'provider_id',
         'language',
         'theme',
+        'tax_rate',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'tax_rate' => 'decimal:2',
         ];
     }
 
