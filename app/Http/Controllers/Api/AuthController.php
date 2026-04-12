@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\GoogleTokenVerifier;
+use App\Services\AppleTokenVerifier;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -13,16 +14,21 @@ class AuthController extends Controller
     {
         $request->validate([
             'provider' => 'required|in:google,apple',
-            'email' => 'required|email',
             'token' => 'required|string',
         ]);
 
+        $payload = match ($request->provider) {
+            'google' => (new GoogleTokenVerifier())->verify($request->token),
+            'apple' => (new AppleTokenVerifier())->verify($request->token),
+        };
+
+        if (!$payload || !$payload['email']) {
+            return response()->json(['message' => 'Invalid token'], 401);
+        }
+
         $user = User::updateOrCreate(
-            ['email' => $request->email],
-            [
-                'provider' => $request->provider,
-                'provider_id' => $request->token,
-            ]
+            ['provider' => $request->provider, 'provider_id' => $payload['provider_id']],
+            ['email' => $payload['email']]
         );
 
         $token = $user->createToken('mobile')->plainTextToken;
