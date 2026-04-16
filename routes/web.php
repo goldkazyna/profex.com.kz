@@ -9,6 +9,10 @@ Route::get('/', function () {
 
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
+Route::get('/delete-account', function () {
+    return view('delete-account');
+});
+
 Route::get('/login', function () {
     return response()->json(['message' => 'Unauthenticated'], 401);
 })->name('login');
