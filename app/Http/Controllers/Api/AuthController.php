@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Services\GoogleTokenVerifier;
 use App\Services\AppleTokenVerifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -30,6 +32,51 @@ class AuthController extends Controller
             ['provider' => $request->provider, 'provider_id' => $payload['provider_id']],
             ['email' => $payload['email']]
         );
+
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = User::create([
+            'email' => $request->email,
+            'password' => $request->password,
+        ]);
+
+        $token = $user->createToken('mobile')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ], 201);
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $request->email)
+            ->whereNull('provider')
+            ->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
 
         $token = $user->createToken('mobile')->plainTextToken;
 
