@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me/settings', [AuthController::class, 'updateSettings']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::delete('/me', [AuthController::class, 'deleteAccount']);
 
     // CRUD
     Route::apiResource('incomes', IncomeController::class);

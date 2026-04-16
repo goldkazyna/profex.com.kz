@@ -110,4 +110,18 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out']);
     }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = $request->user();
+
+        $user->tokens()->delete();
+        $user->incomes()->delete();
+        $user->expenses()->delete();
+        $user->employees()->delete();
+        $user->categories()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'Account deleted']);
+    }
 }
