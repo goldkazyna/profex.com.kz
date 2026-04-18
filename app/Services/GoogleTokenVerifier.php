@@ -8,16 +8,26 @@ class GoogleTokenVerifier
 {
     public function verify(string $idToken): ?array
     {
-        $client = new Google_Client(['client_id' => config('services.google.client_id')]);
-        $payload = $client->verifyIdToken($idToken);
+        try {
+            $client = new Google_Client();
+            $allowedAudiences = array_filter([
+                config('services.google.client_id'),
+                config('services.google.ios_client_id'),
+            ]);
 
-        if (!$payload) {
+            foreach ($allowedAudiences as $audience) {
+                $payload = $client->verifyIdToken($idToken, $audience);
+                if ($payload) {
+                    return [
+                        'email' => $payload['email'],
+                        'provider_id' => $payload['sub'],
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
             return null;
         }
 
-        return [
-            'email' => $payload['email'],
-            'provider_id' => $payload['sub'],
-        ];
+        return null;
     }
 }
