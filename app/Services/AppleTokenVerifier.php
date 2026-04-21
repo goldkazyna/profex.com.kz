@@ -12,27 +12,24 @@ class AppleTokenVerifier
 {
     private const APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys';
 
-    public function verify(string $idToken): ?array
+    public function verify(string $idToken): array
     {
-        try {
-            $keys = $this->getApplePublicKeys();
-            $decoded = JWT::decode($idToken, $keys);
+        $keys = $this->getApplePublicKeys();
+        $decoded = JWT::decode($idToken, $keys);
 
-            if ($decoded->iss !== 'https://appleid.apple.com') {
-                return null;
-            }
-
-            if ($decoded->aud !== config('services.apple.client_id')) {
-                return null;
-            }
-
-            return [
-                'email' => $decoded->email ?? null,
-                'provider_id' => $decoded->sub,
-            ];
-        } catch (\Exception $e) {
-            return null;
+        if ($decoded->iss !== 'https://appleid.apple.com') {
+            throw new \RuntimeException("apple: bad iss '{$decoded->iss}'");
         }
+
+        $expectedAud = config('services.apple.client_id');
+        if ($decoded->aud !== $expectedAud) {
+            throw new \RuntimeException("apple: aud mismatch — expected '{$expectedAud}', got '{$decoded->aud}'");
+        }
+
+        return [
+            'email' => $decoded->email ?? null,
+            'provider_id' => $decoded->sub,
+        ];
     }
 
     private function getApplePublicKeys(): array

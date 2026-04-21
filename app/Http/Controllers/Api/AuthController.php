@@ -8,6 +8,7 @@ use App\Services\GoogleTokenVerifier;
 use App\Services\AppleTokenVerifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -19,13 +20,35 @@ class AuthController extends Controller
             'token' => 'required|string',
         ]);
 
-        $payload = match ($request->provider) {
-            'google' => (new GoogleTokenVerifier())->verify($request->token),
-            'apple' => (new AppleTokenVerifier())->verify($request->token),
-        };
+        try {
+            $payload = match ($request->provider) {
+                'google' => (new GoogleTokenVerifier())->verify($request->token),
+                'apple' => (new AppleTokenVerifier())->verify($request->token),
+            };
+        } catch (\Throwable $e) {
+            Log::warning('Social token verify threw', [
+                'provider' => $request->provider,
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'message' => 'Invalid token',
+                'debug' => get_class($e) . ': ' . $e->getMessage(),
+            ], 401);
+        }
 
-        if (!$payload || !$payload['email']) {
-            return response()->json(['message' => 'Invalid token'], 401);
+        if (!$payload) {
+            return response()->json([
+                'message' => 'Invalid token',
+                'debug' => 'verifier returned null',
+            ], 401);
+        }
+
+        if (empty($payload['email'])) {
+            return response()->json([
+                'message' => 'Invalid token',
+                'debug' => 'token valid but email claim missing (for Apple: email is only returned on first authorization — revoke the app in iOS Settings → Apple ID → Sign-in & Security → Sign in with Apple and retry)',
+            ], 401);
         }
 
         $user = User::updateOrCreate(
