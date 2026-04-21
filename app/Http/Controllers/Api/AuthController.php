@@ -51,9 +51,16 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Email is the canonical user identity — both Google and Apple assert
+        // that the email belongs to the user. If a row with this email already
+        // exists (e.g. user first signed in via Google, now uses Apple), reuse
+        // it and just update the current provider info.
         $user = User::updateOrCreate(
-            ['provider' => $request->provider, 'provider_id' => $payload['provider_id']],
-            ['email' => $payload['email']]
+            ['email' => $payload['email']],
+            [
+                'provider' => $request->provider,
+                'provider_id' => $payload['provider_id'],
+            ]
         );
 
         $token = $user->createToken('mobile')->plainTextToken;
