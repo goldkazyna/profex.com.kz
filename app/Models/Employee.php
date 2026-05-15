@@ -10,12 +10,14 @@ class Employee extends Model
         'user_id',
         'name',
         'net_salary',
+        'opvr_enabled',
     ];
 
     protected function casts(): array
     {
         return [
             'net_salary' => 'decimal:2',
+            'opvr_enabled' => 'boolean',
         ];
     }
 

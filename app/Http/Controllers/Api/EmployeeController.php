@@ -18,6 +18,7 @@ class EmployeeController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'net_salary' => 'required|numeric|min:0',
+            'opvr_enabled' => 'sometimes|boolean',
         ]);
 
         $employee = $request->user()->employees()->create($data);
@@ -43,6 +44,7 @@ class EmployeeController extends Controller
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
             'net_salary' => 'sometimes|numeric|min:0',
+            'opvr_enabled' => 'sometimes|boolean',
         ]);
 
         $employee->update($data);
