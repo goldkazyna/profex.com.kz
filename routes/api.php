@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\AppVersionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\IncomeController;
 use Illuminate\Support\Facades\Route;
+
+// Public — version check (no auth)
+Route::get('/app-version', [AppVersionController::class, 'show']);
 
 // Auth
 Route::post('/auth/social', [AuthController::class, 'socialLogin']);
