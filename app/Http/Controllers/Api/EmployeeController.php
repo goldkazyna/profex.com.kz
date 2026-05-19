@@ -20,10 +20,12 @@ class EmployeeController extends Controller
             'name' => 'required|string|max:255',
             'net_salary' => 'required|numeric|min:0',
             'opvr_enabled' => 'sometimes|boolean',
-            'hire_month' => 'required|date',
+            'hire_month' => 'sometimes|date',
         ]);
 
-        $data['hire_month'] = $this->normalizeMonth($data['hire_month']);
+        $data['hire_month'] = isset($data['hire_month'])
+            ? $this->normalizeMonth($data['hire_month'])
+            : date('Y-m-01');
 
         $employee = $request->user()->employees()->create($data);
 
