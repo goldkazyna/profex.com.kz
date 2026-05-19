@@ -19,6 +19,8 @@ class User extends Authenticatable
         'language',
         'theme',
         'tax_rate',
+        'owner_payroll_salary',
+        'owner_payroll_start_month',
     ];
 
     protected $hidden = [
@@ -31,6 +33,8 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'tax_rate' => 'decimal:2',
+            'owner_payroll_salary' => 'decimal:2',
+            'owner_payroll_start_month' => 'date:Y-m-d',
         ];
     }
 
@@ -52,5 +56,14 @@ class User extends Authenticatable
     public function categories()
     {
         return $this->hasMany(Category::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if ($user->owner_payroll_start_month === null) {
+                $user->owner_payroll_start_month = date('Y-m-01');
+            }
+        });
     }
 }

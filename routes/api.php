@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\IncomeController;
+use App\Http\Controllers\Api\OwnerPayrollController;
 use Illuminate\Support\Facades\Route;
 
 // Public — version check (no auth)
@@ -23,6 +24,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me/settings', [AuthController::class, 'updateSettings']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::delete('/me', [AuthController::class, 'deleteAccount']);
+
+    // Owner payroll
+    Route::get('/owner-payroll', [OwnerPayrollController::class, 'show']);
+    Route::put('/owner-payroll', [OwnerPayrollController::class, 'update']);
+
+    // Employee lifecycle
+    Route::patch('/employees/{employee}/terminate', [EmployeeController::class, 'terminate']);
+    Route::patch('/employees/{employee}/restore', [EmployeeController::class, 'restore']);
 
     // CRUD
     Route::apiResource('incomes', IncomeController::class);

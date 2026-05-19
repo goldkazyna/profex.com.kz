@@ -11,6 +11,8 @@ class Employee extends Model
         'name',
         'net_salary',
         'opvr_enabled',
+        'hire_month',
+        'terminated_month',
     ];
 
     protected function casts(): array
@@ -18,6 +20,8 @@ class Employee extends Model
         return [
             'net_salary' => 'decimal:2',
             'opvr_enabled' => 'boolean',
+            'hire_month' => 'date:Y-m-d',
+            'terminated_month' => 'date:Y-m-d',
         ];
     }
 
