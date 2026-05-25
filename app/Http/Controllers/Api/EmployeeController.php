@@ -56,6 +56,13 @@ class EmployeeController extends Controller
 
         if (isset($data['hire_month'])) {
             $data['hire_month'] = $this->normalizeMonth($data['hire_month']);
+
+            $terminated = $employee->terminated_month;
+            if ($terminated !== null && $data['hire_month'] > $terminated->format('Y-m-01')) {
+                return response()->json([
+                    'message' => 'Hire month cannot be later than the termination month.',
+                ], 422);
+            }
         }
 
         $employee->update($data);
@@ -73,8 +80,16 @@ class EmployeeController extends Controller
             'terminated_month' => 'required|date',
         ]);
 
+        $terminatedMonth = $this->normalizeMonth($data['terminated_month']);
+
+        if ($terminatedMonth < $employee->hire_month->format('Y-m-01')) {
+            return response()->json([
+                'message' => 'Termination month cannot be earlier than the hire month.',
+            ], 422);
+        }
+
         $employee->update([
-            'terminated_month' => $this->normalizeMonth($data['terminated_month']),
+            'terminated_month' => $terminatedMonth,
         ]);
 
         return response()->json($employee);
